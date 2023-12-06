@@ -1,4 +1,4 @@
-# Azure CosmosDB for MongoDB
+# Azure SDK for .NET Cosmos DB for MongoDB
 
 https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-dotnet
 
