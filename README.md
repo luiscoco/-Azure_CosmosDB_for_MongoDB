@@ -35,6 +35,12 @@ Get-Module -ListAvailable AzureRM
 # 2. Create a new CosmosDB MongoDB account in the Azure portal
 
 
+Copy the connection string and create a new environmental variable to store it
+
+![image](https://github.com/luiscoco/Azure_CosmosDB_for_MongoDB/assets/32194879/f304e4ad-70b6-469d-bb36-dd7235f5eccf)
+
+![image](https://github.com/luiscoco/Azure_CosmosDB_for_MongoDB/assets/32194879/89408ec9-1476-44ff-bfda-f9cd7789ab1e)
+
 
 # 3. Create in VSCode a C# .NET 8 console application
 
@@ -119,7 +125,6 @@ public record Product(
 );
 ```
 
-
 # 5. Build and run the application
 
 For running the application type this command:
@@ -130,6 +135,7 @@ dotnet run
 
 See the output in the terminal window
 
+![image](https://github.com/luiscoco/Azure_CosmosDB_for_MongoDB/assets/32194879/0b86de4d-b95e-4f13-91ee-c5811e6dbc65)
 
 
 
