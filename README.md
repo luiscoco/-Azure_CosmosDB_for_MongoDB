@@ -32,72 +32,104 @@ az --version
 Get-Module -ListAvailable AzureRM
 ```
 
-# 2. Create an Azure CosmosDB account
+# 2. Create a new CosmosDB MongoDB account in the Azure portal
+
+
+
+# 3. Create in VSCode a C# .NET 8 console application
+
+Open VSCode in the folder where we would like to create the new application run the following command
+
+```
+dotnet new console --framework net8.0
+```
+
+Add the "Mongo.Driver" library 
+
+```
+dotnet add package MongoDB.Driver
+```
+
+# 4. Input the application source code
 
 ```csharp
 ﻿using System;
+using System.Security.Authentication;
 using System.Threading.Tasks;
-using Azure;
-using Azure.Core;
-using Azure.Identity;
-using Azure.ResourceManager;
-using Azure.ResourceManager.CosmosDB;
-using Azure.ResourceManager.CosmosDB.Models;
-using Azure.ResourceManager.Models;
-using Azure.ResourceManager.Resources;
+using MongoDB.Driver;
 
-//1. Obtaine Azure credentials
-TokenCredential cred = new DefaultAzureCredential();
+//https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-dotnet
 
-//2. Azure Authentication
-ArmClient client = new ArmClient(cred);
+//1. New instance of CosmosClient class
+//string connectionString = @"mongodb://mymongodbaccount:rEhKZAX15zCV6AMGLhcVkdYGngNIHiWa7M8z5cf9MgSSvgEWilqBSNM4FwOwFLRGypHKJslCWn8mACDbZVQTHw==@mymongodbaccount.mongo.cosmos.azure.com:10255/?ssl=true&retrywrites=false&replicaSet=globaldb&maxIdleTimeMS=120000&appName=@mymongodbaccount@";
 
-//3. Set your Azure subscription number
-string subscriptionId = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+string connectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION");
 
-//4. Set the ResourceGroup name where to create the new Azure CosmosDB account
-//It is mandatory to create this ResourceGroup before creating the ComosDB account
-string resourceGroupName = "rg1";
+MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
 
-//5. Create the ResourceGroup Identifier
-ResourceIdentifier resourceGroupResourceId = ResourceGroupResource.CreateResourceIdentifier(subscriptionId, resourceGroupName);
+settings.SslSettings = new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };
 
-//6. Get the ResourceGroup
-ResourceGroupResource resourceGroupResource = client.GetResourceGroupResource(resourceGroupResourceId);
+var MongoDBclient = new MongoClient(settings);
 
-//7. Get the collection of this CosmosDBAccountResource
-CosmosDBAccountCollection collection = resourceGroupResource.GetCosmosDBAccounts();
+//2. Database reference with creation if it does not already exist
+var db = MongoDBclient.GetDatabase("adventure");
 
-//8. Set the data input for creating the CosmosDB account: accountName, account location, etc
-string accountName = "newcosmosdbwithazuresdk";
-CosmosDBAccountCreateOrUpdateContent content = new CosmosDBAccountCreateOrUpdateContent(new AzureLocation("westeurope"), new CosmosDBAccountLocation[]
+//3. Container reference with creation if it does not alredy exist
+var _products = db.GetCollection<Product>("products");
+
+//4. Create new object and upsert (create or replace) to container
+_products.InsertOne(new Product(
+    Guid.NewGuid().ToString(),
+    "gear-surf-surfboards",
+    "Yamba Surfboard", 
+    12, 
+    false
+));
+
+//5. Read a single item from container
+var product = (await _products.FindAsync(p => p.Name.Contains("Yamba"))).FirstOrDefault();
+Console.WriteLine("Single product:");
+Console.WriteLine(product.Name);
+
+//6. Read multiple items from container
+_products.InsertOne(new Product(
+    Guid.NewGuid().ToString(),
+    "gear-surf-surfboards",
+    "Sand Surfboard",
+    4,
+    false
+));
+
+var products = _products.AsQueryable().Where(p => p.Category == "gear-surf-surfboards");
+
+Console.WriteLine("Multiple products:");
+foreach (var prod in products)
 {
-new CosmosDBAccountLocation()
-{
-LocationName = new AzureLocation("westeurope"),
-FailoverPriority = 0,
-IsZoneRedundant = false,
+    Console.WriteLine(prod.Name);
 }
-})
-{
-    CreateMode = CosmosDBAccountCreateMode.Default,
-};
 
-//9. Create/Update a CosmosDB account
-ArmOperation<CosmosDBAccountResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, accountName, content);
+//7. We define the "Product" class 
 
-//10. Get the ComosDB Account Resource
-CosmosDBAccountResource result = lro.Value;
-
-//11. Get the CosmosDB Account Data
-CosmosDBAccountData resourceData = result.Data;
-
-//12. We print the new CosmosDB account Id
-Console.WriteLine($"Succeeded on id: {resourceData.Id}");
+public record Product(
+    string Id,
+    string Category,
+    string Name,
+    int Quantity,
+    bool Sale
+);
 ```
 
 
-# 3. Create a MongoDB
+# 5. Build and run the application
+
+For running the application type this command:
+
+```
+dotnet run
+```
+
+See the output in the terminal window
+
 
 
 
