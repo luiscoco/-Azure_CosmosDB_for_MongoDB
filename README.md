@@ -1,5 +1,7 @@
 # Azure CosmosDB for MongoDB
 
+https://learn.microsoft.com/en-us/azure/cosmos-db/mongodb/quickstart-dotnet
+
 ![image](https://github.com/luiscoco/-Azure_CosmosDB_for_MongoDB/assets/32194879/ddb3991f-8002-48c5-aa2e-3b5d449cfa27)
 
 # 1. Prerequisites
